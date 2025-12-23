@@ -26,10 +26,11 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
-Set env vars:
+Set env vars (не храните токены в git):
 ```
 export TYPEFEED_TELEGRAM_BOT_TOKEN=xxx
 export TYPEFEED_TELEGRAM_CHAT_ID=123456
+# optional: TYPEFEED_FRESHNESS_DAYS=14
 ```
 
 ## Run
@@ -43,7 +44,9 @@ export TYPEFEED_TELEGRAM_CHAT_ID=123456
 ```
 
 ## Notes
-- Filters: last 14 days (override via `TYPEFEED_FRESHNESS_DAYS`), word count ≥200, English/Russian heuristic, tag match from `TAG_KEYWORDS` in `config.py`.
+- Filters: last 14 days (override via `TYPEFEED_FRESHNESS_DAYS`), word count ≥200, English/Russian (langid fallback), tag match from `TAG_KEYWORDS` in `config.py`.
+- Alerts: при 3 подряд ошибках отправляется предупреждение в Telegram (тот же чат). `.fail_count` хранит счетчик.
+- Секреты: токен/чат должны приходить из окружения; `cron.sh` использует env, а не хардкод.
 - Dedup by SHA256 hash (title+url+snippet).
 - Extend tags (examples): `variable fonts`, `open source font`, `foundry`, `display fonts`, `serif`, `sans serif`, `mono`, `color font`.
 - Adjust freshness or minimum words via environment variables in `config.py`.

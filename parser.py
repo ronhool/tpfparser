@@ -7,7 +7,7 @@ from typing import List
 
 from config import DB_PATH, FRESHNESS_DAYS
 from db import NewsDB
-from notifier import send_digest
+from notifier import send_digest, send_alert
 from sources import collect_all, NewsItem
 
 
@@ -63,6 +63,7 @@ def main():
         logger.info("Nothing to do. Use --collect and/or --notify.")
         return
     db = NewsDB(DB_PATH)
+    FAIL_FILE = Path(".fail_count")
 
     async def runner():
         if args.collect:
@@ -70,7 +71,26 @@ def main():
         if args.notify:
             await notify(db, args.days)
 
-    asyncio.run(runner())
+    async def safe_run():
+        try:
+            await runner()
+            if FAIL_FILE.exists():
+                FAIL_FILE.unlink()
+            return True
+        except Exception as exc:  # noqa: BLE001
+            logger.exception("Run failed: %s", exc)
+            fails = 1
+            if FAIL_FILE.exists():
+                try:
+                    fails = int(FAIL_FILE.read_text().strip() or "0") + 1
+                except Exception:
+                    fails = 1
+            FAIL_FILE.write_text(str(fails))
+            if fails >= 3:
+                await send_alert(f"Parser failed {fails} times подряд. Ошибка: {exc}")
+            return False
+
+    asyncio.run(safe_run())
 
 
 if __name__ == "__main__":

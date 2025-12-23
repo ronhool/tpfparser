@@ -7,9 +7,9 @@ set -euo pipefail
 cd "$(dirname "$0")"
 source .venv/bin/activate 2>/dev/null || true
 
-# Hardcoded for deployment; override via env if needed.
-export TYPEFEED_TELEGRAM_BOT_TOKEN="${TYPEFEED_TELEGRAM_BOT_TOKEN:-8210347073:AAHW0QYVVNkELFabPbYfBIYRhc1BV0PubiY}"
-export TYPEFEED_TELEGRAM_CHAT_ID="${TYPEFEED_TELEGRAM_CHAT_ID--1003525198405}"
+# Expect secrets from environment; fallback to empty (notify will warn if missing).
+export TYPEFEED_TELEGRAM_BOT_TOKEN="${TYPEFEED_TELEGRAM_BOT_TOKEN:-}"
+export TYPEFEED_TELEGRAM_CHAT_ID="${TYPEFEED_TELEGRAM_CHAT_ID:-}"
 
 # Skip if no network
 if ! ping -c1 -W2 1.1.1.1 >/dev/null 2>&1; then

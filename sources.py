@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 
 import aiohttp
 import feedparser
+import langid
 from bs4 import BeautifulSoup
 from selectolax.parser import HTMLParser
 
@@ -52,14 +53,20 @@ def word_count(text: str) -> int:
 
 
 def is_lang_supported(text: str) -> bool:
-    # Simple heuristic: allow if text contains mostly Latin/Cyrillic letters.
+    text = text.strip()
+    if not text:
+        return False
+    try:
+        lang, prob = langid.classify(text)
+        if lang in ("en", "ru") and prob > 0.6:
+            return True
+    except Exception:
+        pass
+    # Fallback heuristic
     latin = sum(ch.isalpha() and "a" <= ch.lower() <= "z" for ch in text)
     cyr = sum("\u0400" <= ch <= "\u04FF" for ch in text)
     total = latin + cyr
-    if total == 0:
-        return False
-    ratio = (latin + cyr) / max(len(text), 1)
-    return ratio > 0.2
+    return total > 0 and (latin + cyr) / max(len(text), 1) > 0.2
 
 
 def matches_tags(text: str) -> List[str]:
