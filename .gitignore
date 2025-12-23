@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.venv/
+news.db
+feed.json
+.last_run
+.DS_Store
+.idea/
+.vscode/
+
