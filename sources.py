@@ -553,6 +553,158 @@ async def parse_typetogether(session: aiohttp.ClientSession, url: str, source_na
     return items
 
 
+async def parse_typeroom(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_aiga(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article, .news-card")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_slanted(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_type01(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_mindsparkle(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article, .post")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_abduzeedo(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_gmk(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:15]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
+async def parse_dandad(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    html = await fetch_html(session, url)
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
 SOURCES: List[Source] = [
     Source("Typecache", "https://typecache.com/news/rss", "rss", parse_rss),
     Source("FreeTypography", "https://freetypography.com/feed", "rss", parse_rss),
@@ -574,6 +726,14 @@ SOURCES: List[Source] = [
     Source("DaltonMaag", "https://www.daltonmaag.com", "html", parse_daltonmaag),
     Source("Fontfabric", "https://www.fontfabric.com", "html", parse_fontfabric),
     Source("TypeTogether", "https://www.type-together.com", "html", parse_typetogether),
+    Source("Typeroom", "https://www.typeroom.eu", "html", parse_typeroom),
+    Source("AIGA", "https://www.aiga.org/", "html", parse_aiga),
+    Source("SlantedNews", "https://www.slanted.de/news/", "html", parse_slanted),
+    Source("Type01", "https://type-01.com", "html", parse_type01),
+    Source("MindSparkle", "https://mindsparklemag.com/inspiration", "html", parse_mindsparkle),
+    Source("Abduzeedo", "https://abduzeedo.com", "html", parse_abduzeedo),
+    Source("GMK", "https://gmk.org.tr", "html", parse_gmk),
+    Source("DandAD", "https://www.dandad.org", "html", parse_dandad),
 ]
 
 
