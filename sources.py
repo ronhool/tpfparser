@@ -705,6 +705,38 @@ async def parse_dandad(session: aiohttp.ClientSession, url: str, source_name: st
     return items
 
 
+async def parse_commarts(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    base = url.rstrip("/")
+    candidates = [base, f"{base}/web", f"{base}/features"]
+    html = None
+    last_err = None
+    for candidate in candidates:
+        try:
+            html = await fetch_html(session, candidate)
+            url = candidate
+            break
+        except Exception as exc:  # noqa: BLE001
+            last_err = exc
+            continue
+    if html is None:
+        raise RuntimeError(last_err or f"Failed to fetch {url}")
+    soup = BeautifulSoup(html, "html.parser")
+    cards = soup.select("article")[:20]
+    items: List[NewsItem] = []
+    for card in cards:
+        title_el = card.find(["h2", "h3"])
+        link_el = card.find("a")
+        if not title_el or not link_el:
+            continue
+        title = title_el.get_text(strip=True)
+        link = link_el.get("href")
+        desc = card.get_text(" ", strip=True)
+        item = build_item(title, link, desc, source_name, default_tag="typography", base_url=url)
+        if item:
+            items.append(item)
+    return items
+
+
 SOURCES: List[Source] = [
     Source("Typecache", "https://typecache.com/news/rss", "rss", parse_rss),
     Source("FreeTypography", "https://freetypography.com/feed", "rss", parse_rss),
@@ -734,6 +766,7 @@ SOURCES: List[Source] = [
     Source("Abduzeedo", "https://abduzeedo.com", "html", parse_abduzeedo),
     Source("GMK", "https://gmk.org.tr", "html", parse_gmk),
     Source("DandAD", "https://www.dandad.org", "html", parse_dandad),
+    Source("CommArts", "https://www.commarts.com", "html", parse_commarts),
 ]
 
 
@@ -763,7 +796,12 @@ async def enrich_items_content(items: List[NewsItem], session: aiohttp.ClientSes
 async def collect_all() -> List[NewsItem]:
     cutoff = datetime.utcnow().replace(tzinfo=timezone.utc) - timedelta(days=FRESHNESS_DAYS)
     items: List[NewsItem] = []
-    async with aiohttp.ClientSession(headers={"User-Agent": "typefeed-parser/1.0"}) as session:
+    async with aiohttp.ClientSession(
+        headers={
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+    ) as session:
         tasks = []
         for src in SOURCES:
             if src.kind == "rss":
