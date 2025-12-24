@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Callable, List, Dict, Any, Optional
 from urllib.parse import urljoin
+import contextlib
 
 import aiohttp
 import feedparser
@@ -159,6 +160,23 @@ async def fetch_html(session: aiohttp.ClientSession, url: str, retries: int = 3,
             logger.warning("Fetch failed (%s attempt %s): %s", url, attempt + 1, exc)
             await asyncio.sleep(backoff * (attempt + 1))
     raise RuntimeError(f"Failed to fetch {url}")
+
+
+async def fetch_html_browser(url: str, timeout: int = 25) -> str:
+    try:
+        from playwright.async_api import async_playwright  # type: ignore
+    except Exception as exc:  # noqa: BLE001
+        raise RuntimeError("Playwright is not installed") from exc
+
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True, args=["--no-sandbox"])
+        page = await browser.new_page()
+        try:
+            await page.goto(url, wait_until="networkidle", timeout=timeout * 1000)
+            return await page.content()
+        finally:
+            with contextlib.suppress(Exception):
+                await browser.close()
 
 
 async def parse_myfonts(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
@@ -440,7 +458,12 @@ async def parse_monotype(session: aiohttp.ClientSession, url: str, source_name: 
 
 
 async def parse_typography_dot_com(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
-    html = await fetch_html(session, url)
+    html = None
+    try:
+        html = await fetch_html(session, url)
+    except Exception:
+        # Fallback to browser for 403/blocked pages.
+        html = await fetch_html_browser(url)
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("article, .post-card")[:20]
     items: List[NewsItem] = []
@@ -573,7 +596,11 @@ async def parse_typeroom(session: aiohttp.ClientSession, url: str, source_name: 
 
 
 async def parse_aiga(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
-    html = await fetch_html(session, url)
+    html = None
+    try:
+        html = await fetch_html(session, url)
+    except Exception:
+        html = await fetch_html_browser(url)
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("article, .news-card")[:20]
     items: List[NewsItem] = []
@@ -719,7 +746,8 @@ async def parse_commarts(session: aiohttp.ClientSession, url: str, source_name: 
             last_err = exc
             continue
     if html is None:
-        raise RuntimeError(last_err or f"Failed to fetch {url}")
+        # Try browser fallback
+        html = await fetch_html_browser(url)
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("article")[:20]
     items: List[NewsItem] = []

@@ -6,4 +6,5 @@ python-telegram-bot>=21.7
 requests>=2.32.3
 brotli>=1.1.0
 langid>=1.1.6
+playwright>=1.48.0
 
