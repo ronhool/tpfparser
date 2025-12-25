@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 def _get_bot():
     if not TELEGRAM_BOT_TOKEN:
-        logger.warning("Telegram token not configured; skipping send.")
+        logger.warning("Токен Telegram не настроен; пропускаем отправку.")
         return None
     return Bot(token=TELEGRAM_BOT_TOKEN)
 
@@ -36,7 +36,7 @@ def _build_message(items: List[Dict[str, Any]]) -> str:
 
 async def send_digest(news_items: List[Dict[str, Any]], limit: int = 5):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logger.warning("Telegram token or chat id not configured; skipping notify.")
+        logger.warning("Токен или ID чата Telegram не настроены; пропускаем уведомление.")
         return
 
     bot = _get_bot()
@@ -53,21 +53,21 @@ async def send_digest(news_items: List[Dict[str, Any]], limit: int = 5):
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=False,
     )
-    logger.info("Telegram digest sent (%s items)", len(top_items))
+    logger.info("Дайджест Telegram отправлен (%s записей)", len(top_items))
 
 
 async def send_alert(text: str):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
-        logger.warning("Telegram token or chat id not configured; skipping alert.")
+        logger.warning("Токен или ID чата Telegram не настроены; пропускаем алерт.")
         return
     bot = _get_bot()
     if not bot:
         return
     await bot.send_message(
         chat_id=TELEGRAM_CHAT_ID,
-        text=f"⚠️ Typefeed alert:\n{text}",
+        text=f"⚠️ <b>Typefeed — предупреждение:</b>\n{text}",
         parse_mode=ParseMode.HTML,
         disable_web_page_preview=True,
     )
-    logger.info("Telegram alert sent")
+    logger.info("Алерт Telegram отправлен")
 

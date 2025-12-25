@@ -157,7 +157,7 @@ async def fetch_html(session: aiohttp.ClientSession, url: str, retries: int = 3,
                 resp.raise_for_status()
                 return await resp.text()
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Fetch failed (%s attempt %s): %s", url, attempt + 1, exc)
+            logger.warning("Ошибка получения (%s, попытка %s): %s", url, attempt + 1, exc)
             await asyncio.sleep(backoff * (attempt + 1))
     raise RuntimeError(f"Failed to fetch {url}")
 
@@ -733,6 +733,12 @@ async def parse_dandad(session: aiohttp.ClientSession, url: str, source_name: st
 
 
 async def parse_commarts(session: aiohttp.ClientSession, url: str, source_name: str) -> List[NewsItem]:
+    # Prefer RSS if available to avoid blocks.
+    try:
+        return parse_rss("https://www.commarts.com/feed", source_name)
+    except Exception:
+        pass
+    # Fallback to HTML/browser if RSS fails.
     base = url.rstrip("/")
     candidates = [base, f"{base}/web", f"{base}/features"]
     html = None
@@ -746,7 +752,6 @@ async def parse_commarts(session: aiohttp.ClientSession, url: str, source_name: 
             last_err = exc
             continue
     if html is None:
-        # Try browser fallback
         html = await fetch_html_browser(url)
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select("article")[:20]
@@ -815,7 +820,7 @@ async def enrich_items_content(items: List[NewsItem], session: aiohttp.ClientSes
                 item.content_snippet = snippet
                 item.hash = compute_hash(item.title, item.url, snippet)
         except Exception as exc:  # noqa: BLE001
-            logger.debug("Enrich failed for %s: %s", item.url, exc)
+            logger.debug("Ошибка обогащения для %s: %s", item.url, exc)
         return item
 
     return await asyncio.gather(*(enrich(i) for i in items))
@@ -839,7 +844,7 @@ async def collect_all() -> List[NewsItem]:
         results = await asyncio.gather(*tasks, return_exceptions=True)
         for src, result in zip(SOURCES, results):
             if isinstance(result, Exception):
-                logger.error("Failed to fetch %s: %s", src.name, result)
+                logger.error("Не удалось получить %s: %s", src.name, result)
                 continue
             for item in result:
                 # Date filter
