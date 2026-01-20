@@ -771,10 +771,14 @@ async def parse_commarts(session: aiohttp.ClientSession, url: str, source_name: 
 
 
 SOURCES: List[Source] = [
+    # RSS источники (приоритет - быстрее и надежнее)
     Source("Typecache", "https://typecache.com/news/rss", "rss", parse_rss),
     Source("FreeTypography", "https://freetypography.com/feed", "rss", parse_rss),
     Source("TypographyDaily", "https://feeds.feedburner.com/TypographyDaily", "rss", parse_rss),
     Source("Underware", "https://www.underware.nl/blog/rss/", "rss", parse_rss),
+    Source("GoogleFontsBlog", "https://fonts.googleblog.com/feeds/posts/default", "rss", parse_rss),
+    Source("ILoveTypography", "https://ilovetypography.com/feed/", "rss", parse_rss),
+    Source("Typographica", "https://typographica.org/feed/", "rss", parse_rss),
     Source("TypewolfResources", "https://www.typewolf.com/resources", "html", parse_typewolf),
     Source("FontsInUse", "https://fontsinuse.com", "html", parse_fontsinuse),
     Source("Wallpaper", "https://www.wallpaper.com/", "html", parse_wallpaper),
