@@ -779,6 +779,8 @@ SOURCES: List[Source] = [
     Source("GoogleFontsBlog", "https://fonts.googleblog.com/feeds/posts/default", "rss", parse_rss),
     Source("ILoveTypography", "https://ilovetypography.com/feed/", "rss", parse_rss),
     Source("Typographica", "https://typographica.org/feed/", "rss", parse_rss),
+    Source("Typotheque", "https://www.typotheque.com/blog/typotheque-rss-feed", "rss", parse_rss),
+    Source("TypographyGuru", "https://typography.guru/feed/", "rss", parse_rss),
     Source("TypewolfResources", "https://www.typewolf.com/resources", "html", parse_typewolf),
     Source("FontsInUse", "https://fontsinuse.com", "html", parse_fontsinuse),
     Source("Wallpaper", "https://www.wallpaper.com/", "html", parse_wallpaper),
